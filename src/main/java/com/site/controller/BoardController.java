@@ -132,11 +132,13 @@ public class BoardController {
             return "redirect:/boards";
         }
         model.addAttribute("board", board);
+        List<File> attachedFiles = fileService.findFilesByBoardId(bno);
+        model.addAttribute("attachedFiles", attachedFiles);
         return "boards/editForm";
     }
 
     @PostMapping("/{bno}/edit")
-    public String edit(@PathVariable long bno, Board board, HttpSession session) {
+    public String edit(@PathVariable long bno, Board board, HttpSession session,@RequestParam("file") MultipartFile file) {
         User loginUser = (User) session.getAttribute("user");
         Board exitstingBoard = boardService.findById(bno);
 
@@ -145,6 +147,11 @@ public class BoardController {
         }
         board.setBno(bno);
         boardService.update(board);
+        if (!file.isEmpty()) {
+            // 4. FileService의 saveFile 메서드를 호출하여 파일 저장 로직 실행
+            //    이때, 파일이 첨부된 게시글 ID(bno)와 전달받은 파일 데이터를 함께 전달.
+            fileService.saveFile(board.getBno(), file);
+        }
         return "redirect:/boards/" + bno;
     }
 }

@@ -10,14 +10,32 @@
 <div layout:fragment="content">
     <div class="container">
         <h2>글 수정</h2>
-        <form th:action="@{/boards/{bno}/edit(bno=${board.bno})}" method="post">
+        <form th:action="@{/boards/{bno}/edit(bno=${board.bno})}" method="post" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="title" class="form-label">글제목</label>
                 <input type="text" id="title" name="title" class="form-control" th:value="${board.title}" required>
             </div>
+            <div th:if="${not #lists.isEmpty(attachedFiles)}" class="mb-3">
+                <strong>첨부 파일: </strong>
+                <ul>
+                    <li th:each="attachedFile : ${attachedFiles}">
+                        <div th:if="${#strings.endsWith(attachedFile.original_name,'.jpg')
+                        or #strings.endsWith(attachedFile.original_name,'.png')
+                        or #strings.endsWith(attachedFile.original_name,'.gif')}">
+                            <img width="33%" th:src="@{/images/{filename}(filename=${attachedFile.stored_name})}" class="img-fluid rounded mb-3" alt="첨부된 파일">
+                        </div>
+
+                    </li>
+                </ul>
+            </div>
+
             <div class="mb-3">
                 <label for="content" class="form-label">글내용</label>
                 <textarea id="content" name="content" class="form-control" rows="10" th:text="${board.content}" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="file" class="form-label">파일 첨부</label>
+                <input type="file" id="file" name="file" class="form-control">
             </div>
             <button type="submit" class="btn btn-primary">글수정</button>
             <a th:href="@{/boards/{bno}(bno=${board.bno})}" class="btn btn-secondary">취소</a>
