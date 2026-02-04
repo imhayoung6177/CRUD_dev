@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <meta charset="UTF-8">
+    <title>글 상세</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+        <h2 th:text="${board.title}"></h2>
+        <p><strong>작성자:</strong> <span th:text="${board.writer}"></span></p>
+        <p><strong>작성일:</strong> <span th:text="${#temporals.format(board.createAt, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+        <p th:if="${board.updateAt != null}">
+            <strong>수정일:</strong> <span th:text="${#temporals.format(board.updateAt, 'yyyy-MM-dd HH:mm:ss')}"></span>
+        </p>
+        <hr>
+        <!--
+         첨부 파일이 존재한다면 첨부파일 목록 표시하는 부분
+         Controller에서 전달받은 'attachedFiles' 리스트가 비어있지 않은 경우에만 div 블록을 화면에 표시
+         #lists : Thymeleaf에서 제공하는 유틸 객체
+         -->
+        <div th:if="${not #lists.isEmpty(attachedFiles)}" class="mb-3">
+            <strong>첨부 파일: </strong>
+            <ul>
+                <!-- attachedFiles 리스트를 순회하며 각 파일에 대해 <li>태그를 반복 생성 -->
+                <li th:each="attachedFile : ${attachedFiles}">
+                    <!--
+                    #strings.endsWithIgnoreCase : Thymeleaf의 문자열 유틸리티를 사용하여 파일 이름이 특정 확장자로 끝나는지 확인(대소문자 무시)
+                    이미지 파일인 경우(jpg, png, gif) 이 블록이 표시
+                    -->
+                    <div th:if="${#strings.endsWith(attachedFile.original_name,'.jpg')
+                        or #strings.endsWith(attachedFile.original_name,'.png')
+                        or #strings.endsWith(attachedFile.original_name,'.gif')}">
+                        <img width="33%" th:src="@{/images/{filename}(filename=${attachedFile.stored_name})}" class="img-fluid rounded mb-3" alt="첨부된 파일">
+                        <!-- 파일 다운로드 링크 -->
+                        <a th:href="@{/files/download/{fileId}(fileId=${attachedFile.id})}"
+                           th:text="${attachedFile.original_name}"></a>
+                    </div>
+
+
+                </li>
+            </ul>
+        </div>
+
+        <hr>
+        <p th:text="${board.content}"></p>
+        <hr>
+        <!-- 게시판으로 이동, 수정, 삭제 -->
+        <a th:href="@{/boards}" class="btn btn-secondary">게시판으로 이동</a>
+        <th:block th:if="${session.user != null and session.user.id == board.writer}">
+            <a th:href="@{/boards/{bno}/edit(bno=${board.bno})}" class="btn btn-primary">수정</a>
+            <form th:action="@{/boards/{bno}/delete(bno=${board.bno})}" method="post"
+                  onsubmit="return confirm('정말 삭제하시겠습니까?')" style="display: inline">
+                <button type="submit" class="btn btn-danger">삭제</button>
+            </form>
+        </th:block>
+
+    </div>
+</div>
+</body>
+</html>
