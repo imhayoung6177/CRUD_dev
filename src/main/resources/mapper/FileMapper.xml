@@ -23,4 +23,16 @@
         FROM file
         WHERE id = #{fileId}
     </select>
+
+    <!-- 파일 ID로 특정 파일을 삭제하는 쿼리 -->
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM file
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 특정 게시글에 첨부된 모든 파일을 삭제하는 쿼리 -->
+    <delete id="deleteByBoardId" parameterType="long">
+        DELETE FROM file
+        WHERE board_id = #{bno}
+    </delete>
 </mapper>

@@ -110,7 +110,9 @@ public class BoardController {
         if (loginUser == null || !board.getWriter().equals(loginUser.getId())) {
             return "redirect:/boards";
         }
+        fileService.deleteFilesByBoardId(bno);
         boardService.delete(bno);
+
         return "redirect:/boards";
     }
 
@@ -132,11 +134,13 @@ public class BoardController {
             return "redirect:/boards";
         }
         model.addAttribute("board", board);
+        //기존 첨부파일 정보 조회 후 모델에 추가
         List<File> attachedFiles = fileService.findFilesByBoardId(bno);
         model.addAttribute("attachedFiles", attachedFiles);
         return "boards/editForm";
     }
 
+    //파일 로직 추가 : 새로운 파일 첨부시 기존 파일 삭제 후 새 파일 저장
     @PostMapping("/{bno}/edit")
     public String edit(@PathVariable long bno, Board board, HttpSession session,@RequestParam("file") MultipartFile file) {
         User loginUser = (User) session.getAttribute("user");
@@ -145,12 +149,15 @@ public class BoardController {
         if (loginUser == null || !exitstingBoard.getWriter().equals(loginUser.getId())) {
             return "redirect:/boards";
         }
+        //1. 게시글 텍스트 정보 (제목, 내용)를 업데이트
         board.setBno(bno);
         boardService.update(board);
+        //2. 파일이 실제로 첨부되어있는지 확인
         if (!file.isEmpty()) {
-            // 4. FileService의 saveFile 메서드를 호출하여 파일 저장 로직 실행
-            //    이때, 파일이 첨부된 게시글 ID(bno)와 전달받은 파일 데이터를 함께 전달.
-            fileService.saveFile(board.getBno(), file);
+            // 3. 기존에 첨부된 파일들을 모두 삭제 (서버 파일 + DB 정보)
+            fileService.deleteFilesByBoardId(bno);
+            // 4. 새로운 파일 저장
+            fileService.saveFile(bno, file);
         }
         return "redirect:/boards/" + bno;
     }

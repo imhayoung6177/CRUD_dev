@@ -10,5 +10,10 @@ public interface FileMapper {
 
     List<File> findFilesByBoardId(long bno);
 
-        File findById(long fileId);
+    File findById(long fileId);
+
+    // 첨부된 특정 파일 삭제
+//    void deleteById(long id);
+
+    void deleteByBoardId(long bno);
 }

@@ -15,18 +15,28 @@
                 <label for="title" class="form-label">글제목</label>
                 <input type="text" id="title" name="title" class="form-control" th:value="${board.title}" required>
             </div>
-            <div th:if="${not #lists.isEmpty(attachedFiles)}" class="mb-3">
-                <strong>첨부 파일: </strong>
-                <ul>
-                    <li th:each="attachedFile : ${attachedFiles}">
+            <!-- 기존 첨부파일 표시 -->
+            <div class="mb-3">
+                <label class="form-label">현재 첨부된 파일: </label>
+                <!-- 기존 파일이 없는 경우 -->
+                <div th:if="${lists.isEmpty(attachedFiles)}">
+                    <p class="form-text"> 첨부된 파일이 없습니다.</p>
+                </div>
+                <!-- 이미지인 경우 미리보기 제공 -->
+                <div th:each="attachedFile : ${attachedFiles}">
                         <div th:if="${#strings.endsWith(attachedFile.original_name,'.jpg')
                         or #strings.endsWith(attachedFile.original_name,'.png')
                         or #strings.endsWith(attachedFile.original_name,'.gif')}">
-                            <img width="33%" th:src="@{/images/{filename}(filename=${attachedFile.stored_name})}" class="img-fluid rounded mb-3" alt="첨부된 파일">
+                    <img width="33%" th:src="@{/images/{filename}(filename=${attachedFile.stored_name})}" class="img-fluid rounded mb-3" alt="첨부된 파일">
                         </div>
+                    <!-- 이미지가 아닌 경우 파일 이름만 표시 -->
 
-                    </li>
-                </ul>
+                        <div th:unless="${#strings.endsWith(attachedFile.original_name,'.jpg')
+                        or #strings.endsWith(attachedFile.original_name,'.png')
+                        or #strings.endsWith(attachedFile.original_name,'.gif')}">
+                            <p th:text="${attachedFile.original_name}"></p>
+                        </div>
+                </div>
             </div>
 
             <div class="mb-3">
@@ -36,6 +46,7 @@
             <div class="mb-3">
                 <label for="file" class="form-label">파일 첨부</label>
                 <input type="file" id="file" name="file" class="form-control">
+                <div class="form-text">새 파일 첨부시 기존 파일은 삭제됩니다.</div>
             </div>
             <button type="submit" class="btn btn-primary">글수정</button>
             <a th:href="@{/boards/{bno}(bno=${board.bno})}" class="btn btn-secondary">취소</a>
